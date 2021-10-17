@@ -13,36 +13,29 @@ pygame.display.set_caption("python maze generation")
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 GRAY = (128,128,128)
+RED = (255,0,0)
 RESOLUTION = 50
 
-FPS = 120
+FPS = 60
 
 class node:
-    def __init__(self,x,y):
+    def __init__(self):
         self.east = True
-        self.west = True
-        self.north = True
         self.south = True
 
         self.visited = False
 
-        self.x = x
-        self.y = y
-
-    def convert_coords(self):
-        return self.x+(self.y*RESOLUTION)
-
 def convert_coords(x,y):
     return x+(y*RESOLUTION)
 
-def draw(grid):
+def draw(grid,stack):
     WINDOW.fill(WHITE)
 
     for i in range(RESOLUTION):
         for j in range(RESOLUTION):
 
             if grid[convert_coords(j,i)].visited == False:
-                pygame.draw.rect(WINDOW,GRAY,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-2,(HEIGHT/RESOLUTION)-2])
+                pygame.draw.rect(WINDOW,WHITE,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-2,(HEIGHT/RESOLUTION)-2])
             else:
                 pygame.draw.rect(WINDOW,BLACK,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-2,(HEIGHT/RESOLUTION)-2])
             
@@ -50,6 +43,9 @@ def draw(grid):
                 pygame.draw.rect(WINDOW,BLACK,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-2,(HEIGHT/RESOLUTION)])
             if grid[convert_coords(j,i)].east == False:
                 pygame.draw.rect(WINDOW,BLACK,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION),(HEIGHT/RESOLUTION)-2])
+            
+            if convert_coords(j,i) == stack[-1]:
+                pygame.draw.rect(WINDOW,RED,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-2,(HEIGHT/RESOLUTION)-2])
 
 def get_unv(index,grid):
     unv = []
@@ -64,7 +60,7 @@ def get_unv(index,grid):
     
     if index-1 > 0 and (index-1)%RESOLUTION != RESOLUTION-1 and grid[index-1].visited == False:
         unv.append(index-1)
-    
+
     return unv
 
 def main():
@@ -77,23 +73,20 @@ def main():
     num_vis = 0
     index = 0
 
-    for i in range(RESOLUTION):
-            for j in range(RESOLUTION):
-                grid.append(node(j,i))
+    #fills grid with nodes
+    for i in range(RESOLUTION*RESOLUTION):
+        grid.append(node())
 
     stack.append(0)
     grid[0].visited = True
     num_vis += 1
 
+    #main game loop
     while run:
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        
-        if len(stack) == 0:
-            #end somehow
-            print("end")
 
         unv = get_unv(stack[-1],grid)
         if len(unv) != 0:
@@ -115,7 +108,23 @@ def main():
         else:
             stack.pop()
 
-        draw(grid)
+        if num_vis == RESOLUTION * RESOLUTION:
+            unv.clear()
+            stack.clear()
+            num_vis = 0
+            index = 0
+
+            #clear grid an reset vars for next run
+            for i in range(RESOLUTION*RESOLUTION):
+                grid[i].east = True
+                grid[i].south = True
+                grid[i].visited = False
+
+            stack.append(0)
+            grid[0].visited = True
+            num_vis += 1 
+
+        draw(grid,stack)
         pygame.display.update()
 
     pygame.quit
