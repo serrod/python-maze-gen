@@ -13,7 +13,7 @@ pygame.display.set_caption("python maze generation")
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 GRAY = (128,128,128)
-RESOLUTION = 20
+RESOLUTION = 10
 
 FPS = 60
 
@@ -29,33 +29,39 @@ class node:
         self.x = x
         self.y = y
 
-class maze:
-    def __init__(self, size):
-        self.size = size
-        self.grid = []
-    
-    def setup(self):
-        for i in range(self.size):
-            for j in range(self.size):
-                self.grid.append(node(i,j))
+    def convert_coords(self):
+        return self.x+(self.y*RESOLUTION)
 
-    def get_grid(self):
-        return self.grid
+def convert_coords(x,y):
+    return x+(y*RESOLUTION)
 
-def draw(maze):
-    WINDOW.fill(BLACK)
+def draw(grid):
+    WINDOW.fill(WHITE)
 
     for i in range(RESOLUTION):
         for j in range(RESOLUTION):
-            pygame.draw.rect(WINDOW,GRAY,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-1,(HEIGHT/RESOLUTION)-1])
+
+            if grid[convert_coords(j,i)].visited == False:
+                pygame.draw.rect(WINDOW,GRAY,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-2,(HEIGHT/RESOLUTION)-2])
+            else:
+                pygame.draw.rect(WINDOW,BLACK,[j*(WIDTH/RESOLUTION),i*(HEIGHT/RESOLUTION),(WIDTH/RESOLUTION)-2,(HEIGHT/RESOLUTION)-2])
 
 def main():
     run = True
     clock = pygame.time.Clock()
+    
+    grid = []
+    stack = []
+    num_vis = 0
 
-    m = maze(RESOLUTION)
-    m.setup()
-    print(len(m.grid))
+    for i in range(RESOLUTION):
+            for j in range(RESOLUTION):
+                grid.append(node(j,i))
+
+    grid[5].visited = True
+    grid[26].visited = True
+
+    print(grid[14].visited)
 
     while run:
         clock.tick(FPS)
@@ -63,7 +69,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        draw(m.get_grid)
+        draw(grid)
         pygame.display.update()
 
     pygame.quit
