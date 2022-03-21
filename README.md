@@ -1,1 +1,2 @@
-test
+# python maze generator
+![](maze.gif)
